@@ -23,7 +23,7 @@ The study minimizes makespan, total machine workload, and energy consumption. MO
 | `analysis/rebuild_tables.py` | Offline metric verification, tables, statistical tests and plots from saved data |
 | `docs/` | Protocol, data dictionary, implementation provenance and change records |
 
-The archive contains 1,320 benchmark-function runs and 1,200 MK runs, including the four MOHOA ablations and 100 HSGA runs. All use ten repeats and 200 iterations. NSGA-II is omitted because its results are not used in the revised manuscript. The previous NSGA-II seed slot remains reserved, so removing its code does not renumber the seeds of the retained methods.
+The archive contains 1,320 benchmark-function runs and 1,200 MK runs, including the four MOHOA ablations and 100 HSGA runs. All use ten repeats and 200 iterations.
 
 ## Use the saved results without running experiments
 
