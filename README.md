@@ -53,7 +53,7 @@ The release launchers are new packaging interfaces. Existing algorithm functions
 - The raw FJSP objective columns are **makespan, energy, total workload**, in that order. They are not ordered as in the manuscript's verbal list.
 - Power values are **specified by the authors**, rather than measured equipment data. One benchmark time unit is interpreted as one hour for reporting. Used machines remain on from zero to completion of their last assigned operation; unused machines remain off. Startup/shutdown energy is excluded.
 - Normalization uses shared bounds from the saved reference set, without clipping. HV uses `(1, 1)` or `(1, 1, 1)`. MK references pool all eight main methods and four ablations.
-- The configured population is 100. Native PlatEMO MOEA/D uses 100 members for two objectives and 91 for three objectives; its weight generation is retained.
+- The configured population is 100.
 - Runtime is the original serial whole-call wall-clock time. Seconds per iteration is that value divided by 200 and includes amortized initialization and history storage.
 - HSGA is a **paper-based adaptation**, not official author code. Its changed objective and fixed reproduction conventions are disclosed in `docs/HSGA_SOURCE_AND_ASSUMPTIONS.md`.
 
