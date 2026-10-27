@@ -1,0 +1,15 @@
+# Experimental and reporting protocol
+
+The function suite comprises ZDT1–4 and ZDT6, plus DTLZ1–7. The scheduling suite comprises Brandimarte MK01–MK10. Main methods are MOHOA, MOPSO, NSGA-III, MODA, MOGOA, MOMA and MOEA/D; the paper-based HSGA adaptation is additionally used for MK. Every retained task has ten repeats and 200 iterations. The nominal population request is 100; native three-objective MOEA/D uses 91 weight vectors/members.
+
+MOHOA uses one offspring per parent, 0.70 Cauchy probability, and first-front leadership. No GPS uses uniform random initialization; No Cauchy uses only hiking updates; Crowding replaces reference-point selection with crowding distance; Base combines these three changes. All variants retain the single-offspring and first-front conventions. Base is the study's multi-objective control, not unchanged original single-objective HOA. No separate leader-selection experiment is included.
+
+All objectives are minimized. IGD is mean Euclidean reference-to-obtained distance after common normalization. Exact 2/3-objective HV uses the saved all-ones external reference. No clipping is used, and points beyond the reference box make no HV contribution. All DTLZ3 HV values are zero under this convention; that indicator does not distinguish its algorithms.
+
+Pairwise tests use two-sided Wilcoxon rank-sum / Mann–Whitney U, asymptotic normal variance with tie correction and continuity correction. Completely tied samples have p=1. Holm correction is applied separately for each suite and indicator: 30 ZDT main comparisons, 42 DTLZ main comparisons, 70 MK main comparisons; ablation families have 20, 28 and 40 comparisons respectively. The significance level is 0.05. '+' means MOHOA significantly better, '-' worse, '=' not significant. Friedman ranks use per-problem medians, with lower IGD / higher HV preferred and average ranks for ties.
+
+C(A,B) is the fraction of unique nondominated solutions in B strictly Pareto-dominated by at least one solution in A. Both directions are reported. Runtime is actual serial whole-call elapsed time divided by 200 to give the average per iteration; it includes initialization, evaluation, search, selection and saved history, and is not isolated CPU time for one generation. Fresh timing can differ across machines or sessions.
+
+The comparison is iteration-controlled. Single-offspring MOHOA removes the previous two-offspring mechanism; no identity of all implementations' total objective-function call counts is asserted. Powers are author-specified, used identically across algorithms. The exact reference set, bounds and raw final objective matrices are supplied so the reported indicator values can be checked independently.
+
+The makespan reference is a fixed snapshot of FJSPLib, repository commit `8a6e36ef31263d36975e56fb481e0ba04e188d6f`, checked 26 October 2026: https://github.com/ScheduleOpt/benchmarks/tree/8a6e36ef31263d36975e56fb481e0ba04e188d6f/flexible-jobshop . It is not updated silently at analysis time. The comparison is with reported best-known upper bounds, not a proof of optimality for every instance.

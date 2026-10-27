@@ -1,0 +1,38 @@
+--- algorithms/functions/NSGA3/private/Mutate.m
++++ algorithms/functions/NSGA3/private/Mutate.m
+@@ -30,6 +30,8 @@
+     
+     y=x;
+     
+-    y(j)=x(j)+sigma*randn(size(j));
++    % Match indexed decision shape; keep the same draws and Gaussian step.
++    perturbation=sigma*randn(size(j));
++    y(j)=x(j)+reshape(perturbation,size(x(j)));
+ 
+ end--- algorithms/fjsp/NSGA3/private/Mutate.m
++++ algorithms/fjsp/NSGA3/private/Mutate.m
+@@ -30,6 +30,8 @@
+     
+     y=x;
+     
+-    y(j)=x(j)+sigma*randn(size(j));
++    % Match indexed decision shape; keep the same draws and Gaussian step.
++    perturbation=sigma*randn(size(j));
++    y(j)=x(j)+reshape(perturbation,size(x(j)));
+ 
+ end--- +study/compatible_signature.m
++++ +study/compatible_signature.m
+@@ -1,9 +1,11 @@
+ function yes=compatible_signature(root,saved,current)
+-% Accept only an explicitly audited old-to-current repair pair. Raw files retain their original signatures.
++% Accept only explicitly audited signatures for this exact current repair. Raw signatures remain intact.
+ yes=strcmp(saved,current);
+ if yes,return;end
+ file=fullfile(root,'docs','resume_compatibility.json');
+ if ~isfile(file),return;end
+ record=jsondecode(fileread(file));
+-yes=strcmp(record.CurrentSignature,current)&&strcmp(record.PreviousSignature,saved);
++previous={record.PreviousSignature};
++if isfield(record,'PreviousSignatures'),previous=[previous;record.PreviousSignatures(:)];end
++yes=strcmp(record.CurrentSignature,current)&&any(strcmp(saved,previous));
+ end

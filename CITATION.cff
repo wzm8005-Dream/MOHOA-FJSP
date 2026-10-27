@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "Please cite the accompanying MOHOA study and acknowledge the underlying algorithms and datasets."
+title: "MOHOA for Multi Objective Flexible Job Shop Scheduling Code and Experimental Data"
+type: software
+authors:
+  - family-names: Meng
+    given-names: Wenzhuo
+  - family-names: Mo
+    given-names: Yuanbin
+version: "2026.10.27"
+keywords:
+  - flexible job shop scheduling
+  - multi objective optimization
+  - hiking optimization algorithm
+  - MATLAB

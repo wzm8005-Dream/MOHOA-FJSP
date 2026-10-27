@@ -1,0 +1,343 @@
+--- Functions/NSGA2/NSGA2.m
++++ algorithms\functions\NSGA2\NSGA2_functions.m
+@@ -1,4 +1,6 @@
+-function [Fbest,Xbest,turePF,Result] = NSGA2(Max_iter, SearchAgents_no, FUN, dim, numObj, lb, ub)
++function [Fbest,Xbest,Info] = NSGA2_functions(p,cfg,options)
++Info=struct;
++Max_iter=cfg.Iterations;SearchAgents_no=cfg.Population;FUN=p.Name;dim=p.D;numObj=p.M;lb=p.Lower;ub=p.Upper;
+ 
+ % getMOFcn;
+ 
+@@ -132,6 +134,7 @@
+     
+     % Store F1
+     F1 = pop(F{1});
++    study.history('add',vertcat(F1.Cost));
+     
+     % Show Iteration Information
+     % disp(['Iteration ' num2str(it) ': Repository size:' num2str(numel(F1))]);
+@@ -170,18 +173,15 @@
+ %         axis square;
+ %     end
+ %     
+-% end
++end % End generation loop before collecting the final front.
+ % delete(h_fig);
+ for i=1:size(F1,1)
+     Xbest(i,:)=F1(i).Position;
+     Fbest(i,:)=F1(i).Cost;
+ end
+ 
+-[~,~,turePF]  = getMOFcn(FUN, Xbest, numObj);
+ 
+-Result.IGD = IGD(Fbest,turePF);
+-Result.HV  = HV(Fbest,turePF);
++
+ end
+ 
+ %% Results
+-
+--- Functions/MOPSO/MOPSO.m
++++ algorithms\functions\MOPSO\MOPSO_functions.m
+@@ -41,7 +41,9 @@
+ %       dominance. In International Conference on Evolutionary Multi-Crite%
+ %       rion Optimization (pp. 505-519). Springer Berlin Heidelberg.      %
+ % ----------------------------------------------------------------------- %
+-function [POS_fit,POS,turePF,Result] = MOPSO(Max_iter, SearchAgents_no, FUN, dim, numObj, lb, ub)
++function [POS_fit,POS,Info] = MOPSO_functions(p,cfg,options)
++Info=struct;
++Max_iter=cfg.Iterations;SearchAgents_no=cfg.Population;FUN=p.Name;dim=p.D;numObj=p.M;lb=p.Lower;ub=p.Upper;
+ 
+     % Parameters
+     Np      = SearchAgents_no;
+@@ -186,16 +188,16 @@
+     %     display(['Generation #' num2str(gen) ' - Repository size: ' num2str(size(REP.pos,1))]);
+     % 
+          % Update generation and check for termination
++         study.history('add',REP.pos_fit);
+          gen = gen + 1;
+          if(gen>maxgen), stopCondition = true; end
+      end
+     % hold off;
+ 
+-[~,~,turePF]  = getMOFcn(FUN, POS, numObj);
+ POS_fit = REP.pos_fit;
+ POS = REP.pos;
+-Result.IGD = IGD(POS_fit,turePF);
+-Result.HV  = HV(POS_fit,turePF);
++
++
+ end
+ 
+ % Function that updates the repository given a new population and its
+@@ -344,4 +346,4 @@
+         idx = cum_sizes(2) + randperm(sub_sizes(3),nmut);
+         POS(idx,:) = repmat((var_max-var_min)',nmut,1).*rand(nmut,nVar) + repmat(var_min',nmut,1);
+     end
+-end+end
+--- Functions/MODA/MODA.m
++++ algorithms\functions\MODA\MODA_functions.m
+@@ -18,7 +18,9 @@
+ %   and multi-objective problems, Neural Computing and Applications %
+ %   DOI: http://dx.doi.org/10.1007/s00521-015-1920-1                %
+ %___________________________________________________________________%
+-function [Fbest,Xbest,turePF,Result] = MODA(Max_iter, SearchAgents_no, FUN, dim, numObj, lb, ub)
++function [Fbest,Xbest,Info] = MODA_functions(p,cfg,options)
++Info=struct;
++Max_iter=cfg.Iterations;SearchAgents_no=cfg.Population;FUN=p.Name;dim=p.D;numObj=p.M;lb=p.Lower;ub=p.Upper;
+ 
+ % Parameters
+ N     = SearchAgents_no;
+@@ -251,13 +253,13 @@
+     end
+     
+     % display(['At the iteration ', num2str(iter), ' there are ', num2str(Archive_member_no), ' non-dominated solutions in the archive']);
++    study.history('add',Archive_F);
+ end
+ Xbest=Archive_X;
+ Fbest=Archive_F;
+ 
+-[~,~,turePF]  = getMOFcn(FUN, Xbest, numObj);
+-Result.IGD = IGD(Fbest,turePF);
+-Result.HV  = HV(Fbest,turePF);
++
++
+ end
+ % figure
+ % 
+@@ -270,4 +272,4 @@
+ %     plot3(Archive_F(:,1),Archive_F(:,2),Archive_F(:,3),'ko','MarkerSize',8,'markerfacecolor','k');
+ % end
+ % legend('True PF','Obtained PF');
+-% title('MODA');+% title('MODA');
+--- Functions/MOGOA/MOGOA.m
++++ algorithms\functions\MOGOA\MOGOA_functions.m
+@@ -16,7 +16,10 @@
+ %   Applied Intelligence, 2017, DOI: http://dx.doi.org/10.1007/s10489-017-1019-8
+ %____________________________________________________________________________________
+ 
+-function [Fbest,Xbest,turePF,Result] = MOGOA(Max_iter,SearchAgents_no,FUN,dim,numObj,lb,ub)
++function [Fbest,Xbest,Info] = MOGOA_functions(p,cfg,options)
++Info=struct;
++Max_iter=cfg.Iterations;SearchAgents_no=cfg.Population;FUN=p.Name;dim=p.D;numObj=p.M;lb=p.Lower;ub=p.Upper;
++ProblemDimension=dim; % Auxiliary padding must not change the benchmark definition.
+ % Parameters
+ N     = SearchAgents_no;
+ ArchiveMaxSize = 100;
+@@ -65,7 +68,7 @@
+         GrassHopperPositions(:,i)=(GrassHopperPositions(:,i).*(~(Flag4ub+Flag4lb)))+ub'.*Flag4ub+lb'.*Flag4lb;
+         
+         % GrassHopperFitness(i,:)=ObjectiveFunction(GrassHopperPositions(:,i)');
+-        [GrassHopperFitness(i,:), ~,~] = getMOFcn(FUN, GrassHopperPositions(:,i)', numObj);
++        [GrassHopperFitness(i,:), ~,~] = getMOFcn(FUN, GrassHopperPositions(1:ProblemDimension,i)', numObj);
+         if dominates(GrassHopperFitness(i,:),TargetFitness)
+             TargetFitness=GrassHopperFitness(i,:);
+             TargetPosition=GrassHopperPositions(:,i);
+@@ -121,13 +124,11 @@
+     GrassHopperPositions=GrassHopperPositions_temp';
+     
+     % display(['At the iteration ', num2str(iter), ' there are ', num2str(Archive_member_no), ' non-dominated solutions in the archive']);
++    study.history('add',Archive_F);
+ end
+-Xbest=Archive_X;
++Xbest=Archive_X(:,1:ProblemDimension);
+ Fbest=Archive_F;
+ 
+-[~,~,turePF]  = getMOFcn(FUN, Xbest, numObj);
+-Result.IGD = IGD(Fbest,turePF);
+-Result.HV  = HV(Fbest,turePF);
+-end
+ 
+ 
++end
+--- Functions/MOMA/MOMA.m
++++ algorithms\functions\MOMA\MOMA_functions.m
+@@ -1,4 +1,6 @@
+-function [Fbest,Xbest,turePF,Result] = MOMA(Max_iter, SearchAgents_no, FUN, dim, numObj, lb, ub)
++function [Fbest,Xbest,Info] = MOMA_functions(p,cfg,options)
++Info=struct;
++Max_iter=cfg.Iterations;SearchAgents_no=cfg.Population;FUN=p.Name;dim=p.D;numObj=p.M;lb=p.Lower;ub=p.Upper;
+ 
+ % Parameters
+ Np      = SearchAgents_no;
+@@ -234,6 +236,7 @@
+     % disp(['Iteration ' num2str(it) ': Number of Solution in repository = ' num2str(numel(Pareto))]);
+     % Plot F1 Costs
+ 
++    study.history('add',vertcat(Pareto.Cost));
+     g=g*gdamp;
+     dance = dance*dance_damp;
+     fl = fl*fl_damp;
+@@ -244,8 +247,6 @@
+     Xbest(i,:)=Pareto(i).Position;
+ end
+ 
+-[~,~,turePF]  = getMOFcn(FUN, Xbest, numObj);
+-
+-Result.IGD = IGD(Fbest,turePF);
+-Result.HV  = HV(Fbest,turePF);
+-end
++
++
++end
+--- FJSP/NSGA2/NSGA2.m
++++ algorithms\fjsp\NSGA2\NSGA2_fjsp.m
+@@ -1,10 +1,12 @@
+-function [Fbest,Xbest] = NSGA2(machineNum,jobNum,jobInfo,operaVec,candidateMachine,energy)
++function [Fbest,Xbest,Info] = NSGA2_fjsp(p,cfg,options)
++Info=struct;
++machineNum=p.MachineNum;jobNum=p.jobNum;jobInfo=p.jobInfo;operaVec=p.operaNumVec;candidateMachine=p.candidateMachine;energy=p.Energy;
+ % NSGA2(Max_iter, SearchAgents_no, FUN, dim, numObj, lb, ub)
+ 
+ % getMOFcn;
+ 
+-Max_iter = 200;
+-SearchAgents_no = 100;
++Max_iter = cfg.Iterations;
++SearchAgents_no = cfg.Population;
+ % nVar = dim;
+ nVar = 2*sum(operaVec);
+ VarSize = [1 nVar]; % Size of Decision Variables Matrix
+@@ -146,6 +148,7 @@
+     
+     % Store F1
+     F1 = pop(F{1});
++    study.history('add',vertcat(F1.Cost));
+     
+     % Show Iteration Information
+     % disp(['Iteration ' num2str(it) ': Repository size:' num2str(numel(F1))]);
+@@ -184,7 +187,7 @@
+ %         axis square;
+ %     end
+ %     
+-% end
++end % End generation loop before collecting the final front.
+ % delete(h_fig);
+ for i=1:size(F1,1)
+     Xbest(i,:)=F1(i).Position;
+@@ -194,4 +197,3 @@
+ 
+ end
+ %% Results
+-
+--- FJSP/MOPSO/MOPSO.m
++++ algorithms\fjsp\MOPSO\MOPSO_fjsp.m
+@@ -41,12 +41,14 @@
+ %       dominance. In International Conference on Evolutionary Multi-Crite%
+ %       rion Optimization (pp. 505-519). Springer Berlin Heidelberg.      %
+ % ----------------------------------------------------------------------- %
+-function [POS_fit,POS] = MOPSO( machineNum,jobNum,jobInfo,operaVec,candidateMachine,energy)
++function [POS_fit,POS,Info] = MOPSO_fjsp(p,cfg,options)
++Info=struct;
++machineNum=p.MachineNum;jobNum=p.jobNum;jobInfo=p.jobInfo;operaVec=p.operaNumVec;candidateMachine=p.candidateMachine;energy=p.Energy;
+ 
+     % Parameters
+-    Np      = 100; %SearchAgents_no
++    Np      = cfg.Population; %SearchAgents_no
+     Nr      = 100;
+-    maxgen  = 200;
++    maxgen  = cfg.Iterations;
+     W       = 0.4;
+     C1      = 2;
+     C2      = 2;
+@@ -198,6 +200,7 @@
+     %     display(['Generation #' num2str(gen) ' - Repository size: ' num2str(size(REP.pos,1))]);
+     % 
+          % Update generation and check for termination
++         study.history('add',REP.pos_fit);
+          gen = gen + 1;
+          if(gen>maxgen), stopCondition = true; end
+      end
+@@ -353,4 +356,4 @@
+         idx = cum_sizes(2) + randperm(sub_sizes(3),nmut);
+         POS(idx,:) = repmat((var_max-var_min)',nmut,1).*rand(nmut,nVar) + repmat(var_min',nmut,1);
+     end
+-end+end
+--- FJSP/MODA/MODA.m
++++ algorithms\fjsp\MODA\MODA_fjsp.m
+@@ -18,12 +18,14 @@
+ %   and multi-objective problems, Neural Computing and Applications %
+ %   DOI: http://dx.doi.org/10.1007/s00521-015-1920-1                %
+ %___________________________________________________________________%
+-function [Fbest,Xbest] = MODA(machineNum,jobNum,jobInfo,operaVec,candidateMachine,energy)
++function [Fbest,Xbest,Info] = MODA_fjsp(p,cfg,options)
++Info=struct;
++machineNum=p.MachineNum;jobNum=p.jobNum;jobInfo=p.jobInfo;operaVec=p.operaNumVec;candidateMachine=p.candidateMachine;energy=p.Energy;
+ 
+ % Parameters
+-N     = 100;
++N     = cfg.Population;
+ ArchiveMaxSize = 100;
+-max_iter  = 200;
++max_iter  = cfg.Iterations;
+ % ObjectiveFunction= MultiObj.fun;
+ 
+ nVar = 2*sum(operaVec);             % 自变量维度
+@@ -250,6 +252,7 @@
+     end
+     
+     % display(['At the iteration ', num2str(iter), ' there are ', num2str(Archive_member_no), ' non-dominated solutions in the archive']);
++    study.history('add',Archive_F);
+ end
+ Xbest=Archive_X;
+ Fbest=Archive_F;
+@@ -266,4 +269,4 @@
+ %     plot3(Archive_F(:,1),Archive_F(:,2),Archive_F(:,3),'ko','MarkerSize',8,'markerfacecolor','k');
+ % end
+ % legend('True PF','Obtained PF');
+-% title('MODA');+% title('MODA');
+--- FJSP/MOGOA/MOGOA.m
++++ algorithms\fjsp\MOGOA\MOGOA_fjsp.m
+@@ -16,11 +16,13 @@
+ %   Applied Intelligence, 2017, DOI: http://dx.doi.org/10.1007/s10489-017-1019-8
+ %____________________________________________________________________________________
+ 
+-function [Fbest,Xbest] = MOGOA(machineNum,jobNum,jobInfo,operaVec,candidateMachine,energy)
++function [Fbest,Xbest,Info] = MOGOA_fjsp(p,cfg,options)
++Info=struct;
++machineNum=p.MachineNum;jobNum=p.jobNum;jobInfo=p.jobInfo;operaVec=p.operaNumVec;candidateMachine=p.candidateMachine;energy=p.Energy;
+ % Parameters
+-N  = 100;
++N  = cfg.Population;
+ ArchiveMaxSize = 100;
+-max_iter  = 200;
++max_iter  = cfg.Iterations;
+ % ObjectiveFunction= MultiObj.fun;
+ 
+ nVar = 2*sum(operaVec); 
+@@ -125,10 +127,9 @@
+     GrassHopperPositions=GrassHopperPositions_temp';
+     
+      % display(num2str(iter));
++    study.history('add',Archive_F);
+ end
+ Xbest=Archive_X;
+ Fbest=Archive_F;
+ 
+ end
+-
+-
+--- FJSP/MOMA/MOMA.m
++++ algorithms\fjsp\MOMA\MOMA_fjsp.m
+@@ -1,8 +1,10 @@
+-function [Fbest,Xbest] = MOMA(machineNum,jobNum,jobInfo,operaVec,candidateMachine,energy)
++function [Fbest,Xbest,Info] = MOMA_fjsp(p,cfg,options)
++Info=struct;
++machineNum=p.MachineNum;jobNum=p.jobNum;jobInfo=p.jobInfo;operaVec=p.operaNumVec;candidateMachine=p.candidateMachine;energy=p.Energy;
+ % Parameters
+-Np      = 100;%SearchAgents_no
++Np      = cfg.Population;%SearchAgents_no
+ nPareto = 100;
+-MaxIt  = 200;
++MaxIt  = cfg.Iterations;
+ % ObjectiveFunction= MultiObj.fun;
+ % getMOFcn(FUN, POS, numObj);
+ nVar = 2*sum(operaVec);
+@@ -253,6 +255,7 @@
+ 
+ 
+     clear POSfit;
++    study.history('add',vertcat(Pareto.Cost));
+     g=g*gdamp;
+     dance = dance*dance_damp;
+     fl = fl*fl_damp;

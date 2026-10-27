@@ -1,0 +1,109 @@
+--- algorithms/functions/MOGOA/private/RankingProcess.m
++++ algorithms/functions/MOGOA/private/RankingProcess.m
+@@ -27,11 +27,11 @@
+     my_min = Archive_F;
+     my_max = Archive_F;
+ else
+-    my_min=min(Archive_F);
++    my_min=min(Archive_F,[],1); % Explicit objective dimension, including a single-row archive.
+     %end
+ 
+     %if all(my_max<max(Archive_F))
+-    my_max=max(Archive_F);
++    my_max=max(Archive_F,[],1);
+     %end
+ end
+ 
+--- algorithms/functions/MODA/private/RankingProcess.m
++++ algorithms/functions/MODA/private/RankingProcess.m
+@@ -21,8 +21,8 @@
+ 
+ function ranks=RankingProcess(Archive_F, ArchiveMaxSize, obj_no)
+ 
+-my_min=min(Archive_F);
+-my_max=max(Archive_F);
++my_min=min(Archive_F,[],1); % Explicit objective dimension, including a single-row archive.
++my_max=max(Archive_F,[],1);
+ 
+ if size(Archive_F,1)==1
+     my_min=Archive_F;
+--- algorithms/fjsp/MODA/private/RankingProcess.m
++++ algorithms/fjsp/MODA/private/RankingProcess.m
+@@ -21,8 +21,8 @@
+ 
+ function ranks=RankingProcess(Archive_F, ArchiveMaxSize, obj_no)
+ 
+-my_min=min(Archive_F);
+-my_max=max(Archive_F);
++my_min=min(Archive_F,[],1); % Explicit objective dimension, including a single-row archive.
++my_max=max(Archive_F,[],1);
+ 
+ if size(Archive_F,1)==1
+     my_min=Archive_F;
+--- run_experiments.m
++++ run_experiments.m
+@@ -16,7 +16,7 @@
+ existing=dir(fullfile(folder,'*_r*.mat'));
+ for k=1:numel(existing)
+  saved=load(fullfile(existing(k).folder,existing(k).name),'signature');
+- assert(isfield(saved,'signature')&&strcmp(saved.signature,signature), ...
++ assert(isfield(saved,'signature')&&study.compatible_signature(root,saved.signature,signature), ...
+   'Source/configuration changed. Review existing results before resuming.');
+ end
+ save(fullfile(folder,'configuration.mat'),'cfg','signature','selected','algorithms');
+@@ -24,7 +24,7 @@
+ planned=numel(selected)*numel(algorithms)*cfg.Repeats;
+ done=0;newRuns=0;skipped=0;failures={};session=tic;
+ sessionFile=fullfile(folder,['session_' char(java.util.UUID.randomUUID) '.mat']);
+-sessionCleanup=onCleanup(@saveSession);
++saveSession(); % Explicit checkpoints avoid destroyed nested-workspace variables on exit.
+ fprintf('Serial experiment: %d tasks, %d iterations, %d repeats.\n',planned,cfg.Iterations,cfg.Repeats);
+ for pi=1:numel(selected)
+  for ai=1:numel(algorithms)
+@@ -40,6 +40,7 @@
+     result=study.run_one(root,cfg,problem,algorithm,seed);result.Repeat=repeat;
+     tmp=[file '.partial'];save(tmp,'result','signature','-v7.3');
+     [ok,msg]=movefile(tmp,file);assert(ok,'%s',msg);newRuns=newRuns+1;
++    saveSession();
+     fprintf('  Saved: %.2f seconds\n',result.Seconds);
+    catch err
+     failures(end+1,:)={problem,algorithm,repeat,err.message};
+@@ -47,12 +48,15 @@
+     if fid>=0
+      fprintf(fid,'%s %s r%d\n%s\n',problem,algorithm,repeat,getReport(err,'extended','hyperlinks','off'));fclose(fid);
+     end
+-    rethrow(err); % Stop rather than silently continuing a broken batch.
++    saveSession();
++    rethrow(err); % Preserve the original failure and all previously saved raw runs.
+    end
+   end
+  end
+ end
++saveSession();
+ study.report(root,namespace);
++saveSession();
+ fprintf('Finished. Results: %s\nReports: %s\n',folder,fullfile(root,'reports',namespace));
+  function saveSession()
+   sessionInfo=struct('WallSeconds',toc(session),'NewRuns',newRuns,'Skipped',skipped, ...
+--- +study/report.m
++++ +study/report.m
+@@ -3,16 +3,15 @@
+ if ~isfolder(out),mkdir(out);end
+ allA=[cfg.Algorithms,cfg.Ablations];
+ rows={};summary={};complete={};tests={};cover={};gaps={};extremes={};initialization={};correlations={};
+-signature='';bounds=readtable(fullfile(root,'docs','makespan_reference.csv'),'TextType','string');
++signature=study.signature(root);bounds=readtable(fullfile(root,'docs','makespan_reference.csv'),'TextType','string');
+ for pi=1:numel(cfg.Problems)
+  problem=cfg.Problems{pi};files=dir(fullfile(folder,[problem '_*_r*.mat']));
+  if isempty(files),continue;end
+  runs={};pool=[];
+  for k=1:numel(files)
+   v=load(fullfile(files(k).folder,files(k).name),'result','signature');
+-  if isempty(signature),signature=v.signature;end
+-  assert(strcmp(signature,v.signature),'Mixed source signatures in raw results.');
+-  r=v.result;assert(isequal(r.Config,cfg),'Saved configuration differs from current configuration.');
++  assert(study.compatible_signature(root,v.signature,signature),'Incompatible source signature in raw results.');
++  r=v.result;r.SourceSignature=v.signature;assert(isequal(r.Config,cfg),'Saved configuration differs from current configuration.');
+   r.F=r.F(study.Pop.front(r.F),:);runs{end+1}=r;pool=[pool;r.F];
+  end
+  M=size(pool,2);R=study.reference(problem,M,pool);lo=min(R,[],1);hi=max(R,[],1);ref=cfg.HVReference*ones(1,M);
