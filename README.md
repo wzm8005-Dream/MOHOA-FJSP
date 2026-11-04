@@ -9,4 +9,4 @@ MATLAB code and key experimental data accompanying the revised manuscript.
 
 MK objective columns are **makespan, energy, total workload**, in that order. Powers are author-defined. NSGA-III is the native PlatEMO implementation; HSGA is a paper-based adaptation. MATLAB with Statistics and Machine Learning Toolbox is required for the native dependencies.
 
-Third-party notices remain in the source files; see NOTICE.md. Replace the previous code/data folders with this revision rather than mixing versions.
+Third-party notices remain in the source files; see NOTICE.md.
