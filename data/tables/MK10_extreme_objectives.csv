@@ -1,4 +1,0 @@
-﻿Figure,Criterion,Repeat,Seed,FrontIndex,Cmax,ET,WT,ProcessingEnergy,IdleEnergy,TotalCountedIdle
-25,Lowest makespan,9,26561130,0,310.0,3358.5,2188.0,3235.81,122.69,738.0
-26,Lowest energy,9,26561130,10,345.0,3244.0,2173.0,3129.54,114.46,725.0
-27,Lowest workload,9,26561130,13,351.0,3285.31,2128.0,3147.13,138.18000000000004,895.0
