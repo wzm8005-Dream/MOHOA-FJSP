@@ -1,0 +1,4 @@
+Selection,Repeat,Seed,Cmax,Energy,Workload,ProcessingEnergy,IdleEnergy
+min_makespan,1,26891122,372,3801.1,2477,3594.01,207.09
+min_energy,1,26891122,424,3720.33,2473,3518.95,201.38
+min_workload,1,26891122,424,3786.67,2438,3553.12,233.55

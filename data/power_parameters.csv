@@ -1,0 +1,16 @@
+﻿Machine,ProcessingPower_kW,IdlePower_kW,WorkloadWeight,Origin
+1,1.65,0.12,1.0,Author specified
+2,1.5,0.25,1.0,Author specified
+3,2.25,0.1,1.0,Author specified
+4,1.66,0.15,1.0,Author specified
+5,0.8,0.25,1.0,Author specified
+6,1.45,0.11,1.0,Author specified
+7,1.88,0.2,1.0,Author specified
+8,0.62,0.13,1.0,Author specified
+9,1.76,0.22,1.0,Author specified
+10,1.54,0.3,1.0,Author specified
+11,1.2,0.2,1.0,Author specified
+12,1.14,0.14,1.0,Author specified
+13,2.5,0.26,1.0,Author specified
+14,1.29,0.09,1.0,Author specified
+15,1.77,0.13,1.0,Author specified
